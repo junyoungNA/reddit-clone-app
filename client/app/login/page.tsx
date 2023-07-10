@@ -5,12 +5,15 @@ import axios from 'axios';
 import Link from 'next/link';
 
 import { useRouter } from 'next/navigation';
+import { useAuthDispatch } from '../context/user';
 
 const Login: React.FC<{}> = () => {
     const router = useRouter();    
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [errors, setErros] = useState<any>({});
+
+    const dispatch = useAuthDispatch()
 
     const handleSubmit = async (event : FormEvent) => {
         event.preventDefault();
@@ -19,8 +22,8 @@ const Login: React.FC<{}> = () => {
                 password,
                 username,
             }, {withCredentials : true});
-            console.log(res,'result');
-            router.push('/login');
+            dispatch('LOGIN', res.data?.user);
+            router.push('/');
         }catch (error : any){
             console.log('error',error);
             // setErros(error.response.data || {});

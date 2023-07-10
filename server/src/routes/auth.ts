@@ -9,7 +9,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const mapError = (errors : Object[]) => {
-    console.log(errors, '에러좀');
     return errors.reduce((prev : any,err : any) => {
         prev[err.property] = Object.entries(err.constraints)[0][1];
         return prev;
@@ -65,7 +64,6 @@ const login = async(req: Request , res : Response) => {
         }
         //디비에서 유저 찾기
         const user = await User.findOneBy({username});
-        console.log(user, username, '찾기');
         //유저가 없다면
         if(!user) return res.status(404).json({username:'사용자 이름이 등록되지 않았습니다.'})
         //유저가 있다면 비밀번호 비교하기
