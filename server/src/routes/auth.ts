@@ -1,11 +1,17 @@
 import {Request, Response,Router} from 'express';
 import { User } from '../entities/User';
-import {  validate } from 'class-validator';
+import {  isEmpty, validate } from 'class-validator';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import cookie from 'cookie';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const mapError = (errors : Object[]) => {
     console.log(errors, '에러좀');
     return errors.reduce((prev : any,err : any) => {
-        prev[err.property] = Object.entries(err.constraints[0][1]);
+        prev[err.property] = Object.entries(err.constraints)[0][1];
         return prev;
     } )
 }
@@ -36,15 +42,57 @@ const register = async(req: Request , res : Response) => {
         errors = await validate(user);
         if(errors.length > 0) return res.status(400).json(mapError(errors));
         //유저 정보를 유저 테이블에 저장
-        // await user.save();
-        // return res.json(user);
+        await user.save();
+        return res.json(user);
     } catch(error) {
         // console.error(error);
         return res.status(500).json({error});
     }
 }
 
+const login = async(req: Request , res : Response) => {
+    const {password, username} = req.body;
+    try {
+        let errors: any = {};
+
+        //input이 비워져있다면 erros 객체에 넣어줌
+        if(isEmpty(username)) errors.email =  '사용자 이름은 비워둘 수 없습니다.';
+        if(isEmpty(password)) errors.username = '비밀번호는 비워둘 수 없습니다.';
+
+        //에러가 있다면 return 으로 에러르 response 보내줌
+        if(Object.keys(errors).length > 0) {
+            return res.status(400).json(errors);
+        }
+        //디비에서 유저 찾기
+        const user = await User.findOneBy({username});
+        console.log(user, username, '찾기');
+        //유저가 없다면
+        if(!user) return res.status(404).json({username:'사용자 이름이 등록되지 않았습니다.'})
+        //유저가 있다면 비밀번호 비교하기
+        const passwordMatches = await bcrypt.compare(password,user.password);
+        //비밀번호 다르면 에러 보내기
+        if(!passwordMatches) {
+            return res.status(401).json({password:'비밀번호가 잘못되었습니다.'});
+        }
+        //비밀번호가 맞다면 토큰 생성
+        const token = jwt.sign({username}, process.env.JWT_SECRET)
+        //쿠키 저장
+        res.set('Set-Cookie', cookie.serialize("token", token, {
+            httpOnly : true,
+            // secure:process.env.NODE_ENV === 'production',
+            sameSite:'strict',
+            maxAge:60* 60 * 24 * 7, // 1week
+            path:'/'
+        }));
+        return res.json({user, token});
+    } catch(error) {
+        console.error(error);    
+        return res.status(500).json({error});
+    }
+}
+
 const router = Router();
 router.post('/register', register);
+router.post('/login', login);
 
 export default router;
