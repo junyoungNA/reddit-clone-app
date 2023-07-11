@@ -1,6 +1,8 @@
 import {Request, Response,Router} from 'express';
 import { User } from '../entities/User';
 import {  isEmpty, validate } from 'class-validator';
+import userMiddleware from '../middlewares/user';
+import authMiddleware from '../middlewares/auth';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import cookie from 'cookie';
@@ -8,11 +10,18 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+//유효성 처리후 매세지를 클라이언트로 보냄
 const mapError = (errors : Object[]) => {
     return errors.reduce((prev : any,err : any) => {
         prev[err.property] = Object.entries(err.constraints)[0][1];
         return prev;
-    } )
+    }, {})
+}
+
+//response에 user정보 보내주기 로그인정보 확인을 위해
+const me = async (_:Request, res:Response) => {
+    console.log(res,'res입니다 me');
+    return res.json(res.locals.user);
 }
 
 const register = async(req: Request , res : Response) => {
@@ -23,7 +32,7 @@ const register = async(req: Request , res : Response) => {
         const emailUser = await User.findOneBy({email});
         const usernameUser = await User.findOneBy({username});
 
-        //이미 있다면 erros 객체에 넣어줌
+        // //이미 있다면 erros 객체에 넣어줌
         if(emailUser) errors.email = '이미 해당 이메일 주소가 사용되었습니다.';
         if(usernameUser) errors.username = '이미 이 사용자 이름이 사용되었습니다.';
 
@@ -90,6 +99,7 @@ const login = async(req: Request , res : Response) => {
 }
 
 const router = Router();
+router.get('/me',userMiddleware, authMiddleware , me)
 router.post('/register', register);
 router.post('/login', login);
 

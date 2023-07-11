@@ -1,4 +1,3 @@
-'use client'
 import React, {FormEvent, useState} from 'react';
 import Link from 'next/link';
 import Inputgroup from '../components/Inputgroup';
@@ -19,10 +18,11 @@ const Register = () => {
                 password,
                 username,
             });
+            console.log(res, '결과');
             router.push('/login');
         }catch (error : any){
-            console.log('error',error);
-            // setErros(error.response.data || {});
+            console.log('error',error.response.data);
+            setErros(error.response?.data || {});
         }
     }
 
@@ -32,9 +32,9 @@ const Register = () => {
                 <div className='w-10/12 mx-auto md:w-96'>
                     <h1 className='mb-3 text-lg font-bold'>회원가입</h1>
                     <form  onSubmit={handleSubmit}>
-                        <Inputgroup placehorder='Email' value={email} setValue={setEmail} error={errors.email}/>
-                        <Inputgroup placehorder='Username' value={username} setValue={setUsername} error={errors.username}/>
-                        <Inputgroup placehorder='password' value={password} setValue={setPassword} error={errors.password}/>
+                        <Inputgroup placeholder='Email' value={email} setValue={setEmail} error={errors.email}/>
+                        <Inputgroup placeholder='Username' value={username} setValue={setUsername} error={errors.username}/>
+                        <Inputgroup placeholder='password' value={password} setValue={setPassword} error={errors.password}/>
                         <button className='w-full py-2 mb-1 text-xs font-bold text-white uppercase bg-gray-400 border-gray-400 rounded'>
                             회원가입
                         </button>

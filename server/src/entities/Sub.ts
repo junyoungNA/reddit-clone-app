@@ -4,7 +4,7 @@ import { User } from "./User";
 import { Expose } from "class-transformer";
 import Post from "./Post";
 @Entity('subs')
-export default abstract class Sub extends BaseEntity {
+export default class Sub extends BaseEntity {
     @Index()
     @Column({unique: true})
     name : string;
