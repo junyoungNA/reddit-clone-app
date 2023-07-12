@@ -3,7 +3,6 @@ import React, { FormEvent, useEffect, useState } from 'react'
 import Inputgroup from '../../components/Inputgroup';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/navigation';
-import { headers } from 'next/dist/client/components/headers';
 
 const SubsCreate: React.FC<{}> =  ( ) => {
     const [name, setName] = useState('');

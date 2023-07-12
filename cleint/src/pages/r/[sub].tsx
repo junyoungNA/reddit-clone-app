@@ -1,11 +1,11 @@
+import { useAuthState } from '@/src/context/auth';
 import axios from 'axios';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import React from 'react'
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react'
 import useSWR from 'swr';
 
- const SubPage: React.FC<{}> = () => {
-
+const SubPage: React.FC<{}> = () => {
     const fetcher = async (url:string) => {
         try {
             const res = await axios.get(url);
@@ -17,12 +17,46 @@ import useSWR from 'swr';
     const router = useRouter();
     const subName = router.query.sub;
     const {data : sub, error}  = useSWR(subName ? `/subs/${subName}` : null, fetcher);  
-    console.log(sub);
+    const {authenticated, user} = useAuthState();
+    const [onSub, setOwnSub] = useState(false);
+    useEffect(() => {
+        if(!sub || !user) return;
+        setOwnSub(authenticated && user.username === sub.username);
+    }, [sub])
+
+    const fileInputRef = useRef<HTMLInputElement>(null)
+ 
+
+    const uploadImage  = async(event : ChangeEvent<HTMLInputElement>) => {
+        if(event?.target.files === null ) return;
+        const file = event.target.files[0];
+
+        const formData = new FormData();
+        formData.append('file',file);
+        formData.append('type', fileInputRef.current!.name);
+        try {
+            await axios.post(`/subs/${sub.name}/upload`, formData, {
+                headers:{"Content-Type":"multipart/form-data"}
+            })
+        }catch(error) {
+            console.log(error);
+        }
+    }
+    const openFileInput = (type : string) => {
+        //자신의 커뮤니티 일때만 바꿀 수 있음 if문
+        // if(!onSub) return;
+        const fileInput = fileInputRef.current;
+        if(fileInput) {
+            fileInput.name = type;
+            fileInput.click();
+        }
+    }
     return (
         <>
             {sub &&     
                 <>
                     <div>
+                        <input type="file" hidden={true} className='' ref={fileInputRef} onChange={uploadImage}/>
                         {/* {베너 이미지} */}
                         <div className=' bg-gray-400'>
                             {sub.bannerUrl ? (
@@ -31,8 +65,10 @@ import useSWR from 'swr';
                                     backgroundRepeat:'no-repeat',
                                     backgroundSize:'cover',
                                     backgroundPosition:'center',
-                                }}></div>
-                            ) : (<div className='h-20 bg-gray-400'>
+                                }}
+                                onClick={() => openFileInput("banner")}
+                                ></div>
+                            ) : (<div className='h-20 bg-gray-400'    onClick={() => openFileInput("banner")}>
                                 
                             </div>
                             )}
@@ -48,6 +84,7 @@ import useSWR from 'swr';
                                             width={70}
                                             height={70}
                                             className='rounded-full'
+                                            onClick={() => openFileInput("image")}
                                         />
                                     )}
                                 </div>

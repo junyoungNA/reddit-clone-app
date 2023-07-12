@@ -20,6 +20,9 @@ app.get('/',(_,res) => res.send('running'));
 app.use('/api/auth', authRoutes);
 app.use('/api/subs', subsRoutes);
 
+//이미지 파일을 불러오기 위한 코드
+app.use(express.static('public'));
+
 let port = 4000;
 app.listen(port, async () => {
     console.log(`server running at http://localhost:${port}`);
