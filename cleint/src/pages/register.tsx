@@ -3,22 +3,29 @@ import Link from 'next/link';
 import Inputgroup from '../components/Inputgroup';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { useAuthDispatch, useAuthState } from '../context/auth';
 const Register = () => {
     const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [errors, setErros] = useState<any>({});
-    const router = useRouter();    
+    const router = useRouter();   
+    const {authenticated} = useAuthState();
+    console.log(authenticated, 'auth입니다');
+
+    const dispatch = useAuthDispatch();
+
+    if(authenticated) router.push('/')
+
     
     const handleSubmit = async (event : FormEvent) => {
         event.preventDefault();
         try {
-            const res =  await axios.post(process.env.NEXT_PUBLIC_SERVER_BASE_URL + '/api/auth/register', {
+            const res =  await axios.post('/auth/register',{
                 email,
                 password,
                 username,
             });
-            console.log(res, '결과');
             router.push('/login');
         }catch (error : any){
             console.log('error',error.response.data);

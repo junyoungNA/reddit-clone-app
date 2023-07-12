@@ -20,7 +20,6 @@ const mapError = (errors : Object[]) => {
 
 //response에 user정보 보내주기 로그인정보 확인을 위해
 const me = async (_:Request, res:Response) => {
-    console.log(res,'res입니다 me');
     return res.json(res.locals.user);
 }
 
@@ -62,11 +61,9 @@ const login = async(req: Request , res : Response) => {
     const {password, username} = req.body;
     try {
         let errors: any = {};
-
         //input이 비워져있다면 erros 객체에 넣어줌
-        if(isEmpty(username)) errors.email =  '사용자 이름은 비워둘 수 없습니다.';
-        if(isEmpty(password)) errors.username = '비밀번호는 비워둘 수 없습니다.';
-
+        if(isEmpty(username)) errors.username =  '사용자 이름은 비워둘 수 없습니다.';
+        if(isEmpty(password)) errors.password = '비밀번호는 비워둘 수 없습니다.';
         //에러가 있다면 return 으로 에러르 response 보내줌
         if(Object.keys(errors).length > 0) {
             return res.status(400).json(errors);
@@ -98,9 +95,24 @@ const login = async(req: Request , res : Response) => {
     }
 }
 
+const logout = async(_: Request , res : Response) => {
+    res.set(
+        'Set-cookie',
+        cookie.serialize('token','', {
+            httpOnly:true,
+            secure:process.env.NODE_ENV === 'production',
+            sameSite:'strict',
+            expires: new Date(0),
+            path:'/',
+        })
+    )
+    res.status(200).json({ success:true});
+}
+
 const router = Router();
 router.get('/me',userMiddleware, authMiddleware , me)
 router.post('/register', register);
 router.post('/login', login);
+router.post('/logout', userMiddleware, authMiddleware, logout);
 
 export default router;

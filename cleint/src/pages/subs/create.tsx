@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { FormEvent, useEffect, useState } from 'react'
-import Inputgroup from '../components/Inputgroup';
+import Inputgroup from '../../components/Inputgroup';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/navigation';
 import { headers } from 'next/dist/client/components/headers';
@@ -16,11 +16,12 @@ const SubsCreate: React.FC<{}> =  ( ) => {
         event.preventDefault();
         
         try {
-            const res =  await axios.post(process.env.NEXT_PUBLIC_SERVER_BASE_URL + '/api/subs', {
+            const res =  await axios.post('/subs', {
                 name,
                 title,
                 description
-            }, {withCredentials: true});
+            });
+            router.push(`/r/${res.data.name}`);
         }catch (error : any){
             console.log('error',error.response.data);
             setErrors(error.response?.data || {});
@@ -85,7 +86,7 @@ export const getServerSideProps : GetServerSideProps = async({req, res}) =>{
         const cookie = req.headers.cookie;
         if(!cookie) throw new Error('Missing auth token cookie');
 
-        await axios.get(process.env.NEXT_PUBLIC_SERVER_BASE_URL + '/api/auth/me', {headers:{ cookie}})
+        await axios.get('/auth/me', {headers:{ cookie}})
         return {props: {}}
     } catch(error) {
         //백엔드 요청에서 던져준 쿠키를 이용해 인증 처리할 때 에러가나면 login 페이지로 이동

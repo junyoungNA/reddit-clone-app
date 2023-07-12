@@ -4,23 +4,26 @@ import axios from 'axios';
 import Link from 'next/link';
 
 import { useRouter } from 'next/navigation';
-import { useAuthDispatch } from '../context/user';
+import { useAuthDispatch, useAuthState } from '../context/auth';
 
 const Login: React.FC<{}> = () => {
-    const router = useRouter();    
+    const router = useRouter();     
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [errors, setErros] = useState<any>({});
+    const {authenticated} = useAuthState();
 
-    const dispatch = useAuthDispatch()
+    const dispatch = useAuthDispatch();
+
+    if(authenticated) router.push('/')
 
     const handleSubmit = async (event : FormEvent) => {
         event.preventDefault();
         try {
-            const res =  await axios.post(process.env.NEXT_PUBLIC_SERVER_BASE_URL + '/api/auth/login', {
+            const res =  await axios.post('/auth/login' ,{
                 password,
                 username,
-            }, {withCredentials : true});
+            });
             dispatch('LOGIN', res.data?.user);
             router.push('/');
         }catch (error : any){

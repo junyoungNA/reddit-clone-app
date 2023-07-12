@@ -1,6 +1,5 @@
 import {Request, Response,Router ,NextFunction} from 'express';
 import dotenv from 'dotenv';
-import jwt  from 'jsonwebtoken';
 import { User } from '../entities/User';
 
 dotenv.config();
