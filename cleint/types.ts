@@ -22,7 +22,7 @@ export interface Sub {
 }
 
 export interface Post {
-    indentifier : string;
+    identifier : string;
     title : string;
     slug : string;
     body : string;

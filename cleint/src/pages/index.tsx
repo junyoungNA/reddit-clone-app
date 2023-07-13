@@ -13,7 +13,6 @@ const Home: NextPage = () => {
   }
   const address = `/subs/sub/topSubs`;
     const {data : topSubs } = useSWR<Sub[]>(address, fetcher);
-  console.log(topSubs , 'data');
   return (
     <div className='flex max-w-5xl px-4 pt-5 mx-auto'>
       {/* 포스트 리스트 */}
