@@ -10,8 +10,8 @@ export default class Vote extends BaseEntity {
     @Column()
     value: number;
 
-    @ManyToMany(() => User)
-    @JoinColumn({name:'username', referencedColumnName:'unsername'})
+    @ManyToOne(() => User)
+    @JoinColumn({name:'username', referencedColumnName:'username'})
     user : User
 
     @Column()

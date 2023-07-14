@@ -38,7 +38,7 @@ export interface Post {
     commentCount? :number  
 }
 
-export interface Commnet {
+export interface Comment {
     identifier : string;
     body : string;
     username : string;
@@ -46,6 +46,6 @@ export interface Commnet {
     updatedAt : string;
     post? : Post;
     
-    userVote : string;
-    voteScore : string;
+    userVote : number;
+    voteScore : number;
 }
