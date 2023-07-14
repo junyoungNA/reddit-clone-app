@@ -10,7 +10,8 @@ import axios from 'axios';
 
 interface PostCardProps {
     post : Post
-    subMutate : () => void;
+    subMutate? : () => void;
+    mutate? : () => void;
 }
 
 const PostCard = ({
@@ -28,7 +29,8 @@ const PostCard = ({
         username, 
         sub
     },
-    subMutate
+    subMutate,
+    mutate,
 } : PostCardProps) => {
     const router = useRouter();
     const {authenticated} = useAuthState();
@@ -40,7 +42,8 @@ const PostCard = ({
 
         try {
             await axios.post('/votes', {identifier, slug, value});
-            subMutate();
+            if(mutate) mutate();
+            if(subMutate)subMutate();
         }catch(error) {
             console.log(error);
         }

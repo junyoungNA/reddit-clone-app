@@ -1,10 +1,13 @@
-import { Sub } from '@/types';
+import { Post, Sub } from '@/types';
 import axios from 'axios';
 import type { NextPage } from 'next'
 import Image from 'next/image';
 import Link from 'next/link'
 import useSWR from 'swr';
 import { useAuthState } from '../context/auth';
+import useSWRInfinite from 'swr/infinite';
+import PostCard from '../components/PostCard';
+import { useEffect, useState } from 'react';
 
 const Home: NextPage = () => {
   const {authenticated} = useAuthState();
@@ -13,18 +16,60 @@ const Home: NextPage = () => {
   }
   const address = `/subs/sub/topSubs`;
     const {data : topSubs } = useSWR<Sub[]>(address, fetcher);
+
+  const getKey = (pageIndex : number, previousPageData : Post[]) => {
+  if (previousPageData && !previousPageData.length) return null;
+      return `/posts?page=${pageIndex}`
+  }
+
+  const {data, error, size: page, setSize: setPage, isValidating, mutate } = useSWRInfinite<Post[]>(getKey);
+  const isInitialLoading = !data && !error;
+  const posts : Post[] = data ? ([]as Post[]).concat(...data) : [];
+
+  const [observedPost, setObservedPost] = useState('');
+
+  useEffect(() => {
+    // 포스트가 없다면 return
+    if(!posts || posts.length === 0) return;
+    const id = posts[posts.length - 1].identifier;
+    //포스트 배열에 post가 추가돼서 마지막 post가 바뀌었다면
+    //바뀐 post 중 마지막 post를 observedPost로
+    if(id !== observedPost) {
+      setObservedPost(id);
+      observeElement(document.getElementById(id));
+    }
+  }, [posts]);
+
+  const observeElement = (element : HTMLElement | null) => {
+    if(!element) return;
+    //브라우저 뷰포트와 설정한 요소(element)의 교차점을 관찰
+    const observer = new IntersectionObserver(
+      (entries) => {
+        //isIntersecting : 관찰 대상의 교차 상태(Boolean);
+        if(entries[0].isIntersecting=== true) {
+          console.log('마지막 포스트 접근');
+          setPage(page + 1);
+          observer.unobserve(element);
+          //마지막 포스트에 접근했으니 전에 관찰했던 element요소를 지움
+        }
+      },
+      {threshold : 1}
+    );
+    observer.observe(element);
+  }
+
   return (
     <div className='flex max-w-5xl px-4 pt-5 mx-auto'>
       {/* 포스트 리스트 */}
       <div className='w-full md:mr-3 md:w-8/12'>
-        {/* {isInitialLoading && <p className="text-lg text-center">로딩중입니다...</p>}
+        {isInitialLoading && <p className="text-lg text-center">로딩중입니다...</p>}
         {posts?.map(post => (
           <PostCard
             key={post.identifier}
             post={post}
             mutate={mutate}
           />
-        ))} */}
+        ))}
 
       </div>
 
