@@ -5,6 +5,7 @@ import authRoutes from './routes/auth';
 import subsRoutes from './routes/subs';
 import postsRoutes from './routes/posts';
 import votesRoutes from './routes/votes';
+import userRoutes from './routes/users';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
@@ -23,6 +24,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/subs', subsRoutes);
 app.use('/api/posts', postsRoutes);
 app.use('/api/votes', votesRoutes);
+app.use('/api/users', userRoutes);
 
 //이미지 파일을 불러오기 위한 코드
 app.use(express.static('public'));
